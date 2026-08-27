@@ -1,0 +1,365 @@
+.chat {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.chat-scroll {
+  flex: 1;
+  overflow-y: auto;
+  background: var(--bg-chat);
+}
+
+.chat-content {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 40px 24px 24px;
+}
+
+/* Empty state */
+.empty-state {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 48px 0;
+}
+
+.empty-logo {
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  background: linear-gradient(135deg, var(--accent), #b36bff);
+  margin-bottom: 20px;
+}
+
+.empty-state h1 {
+  font-size: 28px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  margin: 0 0 28px;
+  color: var(--text);
+}
+
+.suggestions {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  width: 100%;
+  max-width: 480px;
+}
+
+.suggestions button {
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px 18px;
+  font-size: 15px;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.suggestions button:hover {
+  background: var(--surface-hover);
+  border-color: var(--accent);
+}
+
+@media (min-width: 640px) {
+  .suggestions {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* Messages */
+.messages {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding-bottom: 12px;
+}
+
+.message {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+}
+
+.message-avatar {
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  display: grid;
+  place-items: center;
+  margin-top: 2px;
+}
+
+.message.user .message-avatar {
+  background: var(--accent);
+  color: #fff;
+}
+
+.message.assistant .message-avatar {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.message-bubble {
+  flex: 1;
+  min-width: 0;
+  color: var(--text);
+  font-size: 16px;
+  line-height: 1.65;
+  word-break: break-word;
+  padding-top: 3px;
+}
+
+.message-bubble > *:first-child {
+  margin-top: 0;
+}
+
+.message-bubble > *:last-child {
+  margin-bottom: 0;
+}
+
+.message-bubble p {
+  margin: 0.6em 0;
+}
+
+.message-bubble h1,
+.message-bubble h2,
+.message-bubble h3,
+.message-bubble h4 {
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  margin: 1.1em 0 0.5em;
+  line-height: 1.3;
+}
+
+.message-bubble h1 {
+  font-size: 1.5em;
+}
+
+.message-bubble h2 {
+  font-size: 1.3em;
+}
+
+.message-bubble h3 {
+  font-size: 1.15em;
+}
+
+.message-bubble h4 {
+  font-size: 1.05em;
+}
+
+.message-bubble ul,
+.message-bubble ol {
+  margin: 0.6em 0;
+  padding-left: 1.5em;
+}
+
+.message-bubble li {
+  margin: 0.25em 0;
+}
+
+.message-bubble li > ul,
+.message-bubble li > ol {
+  margin: 0.25em 0;
+}
+
+.message-bubble blockquote {
+  margin: 0.8em 0;
+  padding: 0.1em 1em;
+  border-left: 3px solid var(--accent);
+  color: var(--text-muted);
+  background: var(--accent-soft);
+  border-radius: 0 10px 10px 0;
+}
+
+.message-bubble code {
+  font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  font-size: 0.9em;
+  background: var(--surface-hover);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  padding: 0.15em 0.4em;
+}
+
+.message-bubble pre {
+  background: var(--code-bg, #1e1e2e);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px 16px;
+  overflow-x: auto;
+  margin: 0.8em 0;
+  line-height: 1.5;
+}
+
+.message-bubble pre code {
+  background: transparent;
+  border: none;
+  padding: 0;
+  font-size: 0.875em;
+  color: #e4e4ef;
+}
+
+.message-bubble table {
+  border-collapse: collapse;
+  margin: 0.8em 0;
+  width: 100%;
+  font-size: 0.95em;
+}
+
+.message-bubble th,
+.message-bubble td {
+  border: 1px solid var(--border);
+  padding: 8px 12px;
+  text-align: left;
+}
+
+.message-bubble th {
+  background: var(--surface-hover);
+  font-weight: 600;
+}
+
+.message-bubble tr:nth-child(even) td {
+  background: var(--accent-soft);
+}
+
+.message-bubble hr {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 1.2em 0;
+}
+
+.message-bubble a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.message-bubble a:hover {
+  text-decoration: underline;
+}
+
+.message.user .message-bubble {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 12px 16px;
+}
+
+.cursor {
+  display: inline-block;
+  width: 8px;
+  height: 18px;
+  background: var(--accent);
+  border-radius: 2px;
+  vertical-align: -2px;
+  animation: blink 1s steps(2, start) infinite;
+}
+
+@keyframes blink {
+  to {
+    visibility: hidden;
+  }
+}
+
+/* Composer */
+.composer-area {
+  padding: 8px 16px 16px;
+  background: var(--bg);
+}
+
+.composer {
+  max-width: 760px;
+  margin: 0 auto;
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 8px 8px 8px 16px;
+  transition: border-color 0.15s ease;
+}
+
+.composer:focus-within {
+  border-color: var(--accent);
+}
+
+.composer textarea {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  resize: none;
+  color: var(--text);
+  font-size: 16px;
+  line-height: 1.5;
+  max-height: 200px;
+  padding: 8px 0;
+}
+
+.composer textarea::placeholder {
+  color: var(--text-muted);
+}
+
+.send-btn {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  background: var(--accent);
+  color: #fff;
+  transition:
+    background 0.15s ease,
+    opacity 0.15s ease;
+}
+
+.send-btn:hover:not(:disabled) {
+  background: var(--accent-hover);
+}
+
+.send-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.send-btn.stop {
+  background: var(--surface-hover);
+  color: var(--text);
+}
+
+.send-btn.stop:hover {
+  background: var(--danger);
+  color: #fff;
+}
+
+.error {
+  max-width: 760px;
+  margin: 10px auto 0;
+  color: var(--danger);
+  font-size: 14px;
+}
+
+.disclaimer {
+  max-width: 760px;
+  margin: 10px auto 0;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 12.5px;
+  line-height: 1.5;
+}
