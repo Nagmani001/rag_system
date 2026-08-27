@@ -20,7 +20,8 @@ services:
       - "3001:3000"
     environment:
       - PORT=3000
-      - CHROMA_URL=http://chromadb:8000
+      - CHROMA_DB_URL=http://chromadb:8000
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
     depends_on:
       chromadb:
         condition: service_healthy

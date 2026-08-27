@@ -7,9 +7,6 @@ import type { Metadata } from "chromadb";
 import { chromaClient } from "./chroma";
 import {
   extractPdfText,
-  titleForPolicy,
-  detectCenter,
-  extractPolicyNumber,
   splitIntoChunks,
   parseTranscriptFilename,
 } from "./lib";
@@ -20,8 +17,18 @@ const POLICIES_DIR = join(DATA_ROOT, "docs_for_test", "docs_for_test");
 const TRANSCRIPTS_DIR = join(DATA_ROOT, "transcriptions_for_test", "transcriptions_for_test");
 
 
+async function resetCollection(name: string) {
+  try {
+    await chromaClient.deleteCollection({ name });
+    console.log(`[ingest] dropped existing collection '${name}'`);
+  } catch {
+    console.log(`[ingest] collection '${name}' did not exist, creating fresh`);
+  }
+  return chromaClient.createCollection({ name });
+}
+
 async function ingestPolicies() {
-  const collection = chromaClient.createCollection({ name: "policies" });
+  const collection = await resetCollection("policies");
   const files = readdirSync(POLICIES_DIR)
     .filter((f) => f.toLowerCase().endsWith(".pdf"))
     .map((f) => ({ name: f, path: join(POLICIES_DIR, f) }));;
@@ -32,9 +39,7 @@ async function ingestPolicies() {
     const text = await extractPdfText(file.path);
     const policyId = uuidv4();
 
-    const chunks = splitIntoChunks(text);
-    const center = detectCenter(text);
-    const policyNumber = extractPolicyNumber(text);
+    const chunks = await splitIntoChunks(text);
 
     const ids: string[] = [];
     const documents: string[] = [];
@@ -46,10 +51,7 @@ async function ingestPolicies() {
       metadatas.push({
         docType: "policy",
         policyId,
-        title: titleForPolicy(file.name),
         sourceFile: file.name,
-        center,
-        ...(policyNumber ? { policyNumber } : {}),
         chunkIndex: index,
         totalChunks: chunks.length,
       });
@@ -58,7 +60,7 @@ async function ingestPolicies() {
     await collection.add({ ids, metadatas, documents });
     totalRecords += chunks.length;
     console.log(
-      `[policies] ${file.name} -> center=${center} chunks=${chunks.length} chars=${text.length}`
+      `[policies] ${file.name}  chunks=${chunks.length} chars=${text.length}`
     );
   }
 
@@ -66,7 +68,7 @@ async function ingestPolicies() {
 }
 
 async function ingestTranscripts() {
-  const collection = chromaClient.createCollection({ name: "transcripts" });
+  const collection = await resetCollection("transcripts");
   const files = readdirSync(TRANSCRIPTS_DIR)
     .filter((f) => f.toLowerCase().endsWith(".pdf"))
     .map((f) => ({ name: f, path: join(TRANSCRIPTS_DIR, f) }));;
@@ -82,7 +84,7 @@ async function ingestTranscripts() {
 
     const text = await extractPdfText(file.path);
     const transcriptId = uuidv4();
-    const chunks = splitIntoChunks(text);
+    const chunks = await splitIntoChunks(text);
 
     const ids: string[] = [];
     const documents: string[] = [];

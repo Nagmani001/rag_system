@@ -1,8 +1,15 @@
 import { readFileSync } from "node:fs";
 import { PDFParse } from "pdf-parse";
+import { RecursiveCharacterTextSplitter } from "@langchain/textsplitters";
 
-export const CHUNK_SIZE = 1200;
-export const CHUNK_OVERLAP = 150;
+export const CHUNK_SIZE = 512;
+export const CHUNK_OVERLAP = 64;
+
+const textSplitter = new RecursiveCharacterTextSplitter({
+  chunkSize: CHUNK_SIZE,
+  chunkOverlap: CHUNK_OVERLAP,
+  separators: ["\n\n", "\n", ". ", "? ", "! "],
+});
 
 export async function extractPdfText(filePath: string): Promise<string> {
   const parser = new PDFParse({ data: readFileSync(filePath) });
@@ -14,28 +21,8 @@ export async function extractPdfText(filePath: string): Promise<string> {
   }
 }
 
-export function titleForPolicy(fileName: string): string {
-  return fileName
-    .replace(/\.pdf$/i, "")
-    .replace(/[-_]+/g, " ")
-    .replace(/\bcopy\b/gi, "")
-    .replace(/\s+/g, " ")
-    .trim()
-    .replace(/\b\w/g, (c) => c.toUpperCase());
-}
 
-export function detectCenter(text: string): string {
-  if (/Johnson County/i.test(text)) return "johnson-county";
-  if (/\bDCCC\b|Dubois County/i.test(text)) return "dubois-county";
-  if (/State of Colorado|Colorado Community Corrections/i.test(text)) return "colorado-statewide";
-  return "general";
-}
-
-export function extractPolicyNumber(text: string): string | undefined {
-  return text.match(/Policy Number\s*[:#]?\s*(\d+)/i)?.[1];
-}
-
-export function splitIntoChunks(text: string): string[] {
+export async function splitIntoChunks(text: string): Promise<string[]> {
   const normalized = text
     .replace(/\r\n/g, "\n")
     .replace(/\u00a0/g, " ")
@@ -43,58 +30,7 @@ export function splitIntoChunks(text: string): string[] {
     .replace(/\n{3,}/g, "\n\n")
     .trim();
 
-  const lines = normalized
-    .split("\n")
-    .map((l) => l.trim())
-    .filter(Boolean);
-
-  const chunks: string[] = [];
-  let buffer: string[] = [];
-  let bufferLen = 0;
-
-  const flush = () => {
-    if (buffer.length > 0) {
-      chunks.push(buffer.join("\n"));
-      buffer = [];
-      bufferLen = 0;
-    }
-  };
-
-  const pushLine = (line: string) => {
-    const addLen = bufferLen === 0 ? line.length : line.length + 1;
-    if (bufferLen + addLen > CHUNK_SIZE && buffer.length > 0) {
-      const carry: string[] = [];
-      let carryLen = 0;
-      for (let i = buffer.length - 1; i >= 0; i--) {
-        const prev = buffer[i]!;
-        if (carryLen + prev.length > CHUNK_OVERLAP) break;
-        carry.unshift(prev);
-        carryLen += prev.length;
-      }
-      chunks.push(buffer.join("\n"));
-      buffer = carry;
-      bufferLen = carryLen;
-    }
-    buffer.push(line);
-    bufferLen += line.length + 1;
-  };
-
-  for (const line of lines) {
-    if (line.length <= CHUNK_SIZE) {
-      pushLine(line);
-      continue;
-    }
-    flush();
-    const sentences = line.match(/[^.!?]+[.!?]+["')\]]*|[^.!?]+$/g) ?? [line];
-    for (const sentence of sentences) {
-      const trimmed = sentence.trim();
-      if (!trimmed) continue;
-      if (trimmed.length <= CHUNK_SIZE) pushLine(trimmed);
-      else pushLine(trimmed.slice(0, CHUNK_SIZE));
-    }
-  }
-  flush();
-  return chunks;
+  return textSplitter.splitText(normalized);
 }
 
 export type TranscriptInfo = {
